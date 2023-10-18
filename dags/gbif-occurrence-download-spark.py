@@ -53,28 +53,28 @@ def print_processed_template(ti=None):
     print(processedTemplate)
 
 with DAG(
-    dag_id='gbif_occurrence_download_dag',
-    schedule_interval=None,
-    start_date=datetime.now(),
-    catchup=False,
-    dagrun_timeout=timedelta(minutes=180),
-    tags=['spark_executor', 'GBIF', 'occurrence_download'],
-    params= {
-        "args": Param(["", "Occurrence"], type="array"),
-        "version": Param("1.0.11", type="string"),
-        "component": Param("occurrence-download-spark", type="string"),
-        "main": Param("org.gbif.occurrence.download.spark.SparkDownloads", type="string"),
-        "hdfsClusterName": Param("gbif-hdfs", type="string"),
-        "hiveClusterName": Param("gbif-hive-metastore", type="string"),
-        "hbaseClusterName": Param("gbif-hbase", type="string"),
-        "componentConfig": Param("occurrence", type="string"),
-        "driverCores": Param("2000m", type="string"),
-        "driverMemory": Param("2Gi", type="string"),
-        "executorInstances": Param(6, type="integer", minimum=1, maximum=12),
-        "executorCores": Param("6000m", type="string"),
-        "executorMemory": Param("10Gi", type="string"),
-        "callbackUrl": Param("", type="string")
-    },
+        dag_id='gbif_occurrence_download_dag',
+        schedule_interval=None,
+        start_date=datetime.now(),
+        catchup=False,
+        dagrun_timeout=timedelta(minutes=180),
+        tags=['spark_executor', 'GBIF', 'occurrence_download'],
+        params= {
+            "args": Param(["", "Occurrence"], type="array"),
+            "version": Param("1.0.11", type="string"),
+            "component": Param("occurrence-download-spark", type="string"),
+            "main": Param("org.gbif.occurrence.download.spark.SparkDownloads", type="string"),
+            "hdfsClusterName": Param("gbif-hdfs", type="string"),
+            "hiveClusterName": Param("gbif-hive-metastore", type="string"),
+            "hbaseClusterName": Param("gbif-hbase", type="string"),
+            "componentConfig": Param("occurrence", type="string"),
+            "driverCores": Param("2000m", type="string"),
+            "driverMemory": Param("2Gi", type="string"),
+            "executorInstances": Param(6, type="integer", minimum=1, maximum=12),
+            "executorCores": Param("6000m", type="string"),
+            "executorMemory": Param("10Gi", type="string"),
+            "callbackUrl": Param("", type="string")
+        },
 ) as dag:
 
     process_application_file = process_template()
