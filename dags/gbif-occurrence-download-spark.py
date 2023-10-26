@@ -86,7 +86,9 @@ with DAG(
         namespace=Variable.get('namespace_to_run'),
         application_file="{{ task_instance.xcom_pull(key='return_value', task_ids='process_application_file') }}",
         do_xcom_push=True,
-        dag=dag
+        dag=dag,
+        on_success_callback=on_execute_download,
+        on_failure_callback=on_failure_download
     )
 
     monitor_spark = SparkKubernetesSensor(
@@ -96,8 +98,7 @@ with DAG(
         poke_interval=10,
         dag=dag,
         on_success_callback=on_success_download,
-        on_failure_callback=on_failure_download,
-        on_execute_callback=on_execute_download
+        on_failure_callback=on_failure_download
     )
 
     process_application_file >> print_application_file >> start_spark >> monitor_spark
