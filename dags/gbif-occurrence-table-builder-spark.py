@@ -45,7 +45,7 @@ with DAG(
     tags=['spark_executor', 'GBIF', 'occurrence_table_builder'],
     params= {
         "args": Param(["/etc/gbif/config.yaml", "CREATE", "ALL"], type="array"),
-        "version": Param("1.1.11", type="string"),
+        "version": Param("1.1.12", type="string"),
         "component": Param("occurrence-table-build-spark", type="string"),
         "main": Param("org.gbif.occurrence.table.backfill.TableBackfill", type="string"),
         "hdfsClusterName": Param("gbif-hdfs", type="string"),
