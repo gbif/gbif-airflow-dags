@@ -46,7 +46,7 @@ with DAG(
     params= {
         "args": Param(["/etc/gbif/config.yaml", "CREATE", "ALL"], type="array"),
         "version": Param("1.1.10", type="string"),
-        "component": Param("occurrence-table-builder-spark", type="string"),
+        "component": Param("occurrence-table-build-spark", type="string"),
         "main": Param("org.gbif.occurrence.table.backfill.TableBackfill", type="string"),
         "hdfsClusterName": Param("gbif-hdfs", type="string"),
         "hiveClusterName": Param("gbif-hive-metastore", type="string"),
