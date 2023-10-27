@@ -51,7 +51,7 @@ with DAG(
         "hdfsClusterName": Param("gbif-hdfs", type="string"),
         "hiveClusterName": Param("gbif-hive-metastore", type="string"),
         "hbaseClusterName": Param("gbif-hbase", type="string"),
-        "componentConfig": Param("gbif-occurrence-table-builder", type="string"),
+        "componentConfig": Param(" occurrence-table-build", type="string"),
         "driverCores": Param("2000m", type="string"),
         "driverMemory": Param("2Gi", type="string"),
         "executorInstances": Param(6, type="integer", minimum=1, maximum=12),
