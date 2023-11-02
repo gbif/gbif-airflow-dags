@@ -53,28 +53,28 @@ def print_processed_template(ti=None):
     print(processedTemplate)
 
 with DAG(
-    dag_id='gbif_occurrence_download_dag',
-    schedule_interval=None,
-    start_date=datetime.now(),
-    catchup=False,
-    dagrun_timeout=timedelta(minutes=180),
-    tags=['spark_executor', 'GBIF', 'occurrence_download'],
-    params= {
-        "args": Param(["", "Occurrence"], type="array"),
-        "version": Param("1.0.11", type="string"),
-        "component": Param("occurrence-download-spark", type="string"),
-        "main": Param("org.gbif.occurrence.download.spark.SparkDownloads", type="string"),
-        "hdfsClusterName": Param("gbif-hdfs", type="string"),
-        "hiveClusterName": Param("gbif-hive-metastore", type="string"),
-        "hbaseClusterName": Param("gbif-hbase", type="string"),
-        "componentConfig": Param("occurrence", type="string"),
-        "driverCores": Param("2000m", type="string"),
-        "driverMemory": Param("2Gi", type="string"),
-        "executorInstances": Param(6, type="integer", minimum=1, maximum=12),
-        "executorCores": Param("6000m", type="string"),
-        "executorMemory": Param("10Gi", type="string"),
-        "callbackUrl": Param("", type="string")
-    },
+        dag_id='gbif_occurrence_download_dag',
+        schedule_interval=None,
+        start_date=datetime.now(),
+        catchup=False,
+        dagrun_timeout=timedelta(minutes=180),
+        tags=['spark_executor', 'GBIF', 'occurrence_download'],
+        params= {
+            "args": Param(["", "Occurrence"], type="array"),
+            "version": Param("1.0.17", type="string"),
+            "component": Param("occurrence-download-spark", type="string"),
+            "main": Param("org.gbif.occurrence.download.spark.SparkDownloads", type="string"),
+            "hdfsClusterName": Param("gbif-hdfs", type="string"),
+            "hiveClusterName": Param("gbif-hive-metastore", type="string"),
+            "hbaseClusterName": Param("gbif-hbase", type="string"),
+            "componentConfig": Param("occurrence", type="string"),
+            "driverCores": Param("2000m", type="string"),
+            "driverMemory": Param("2Gi", type="string"),
+            "executorInstances": Param(6, type="integer", minimum=1, maximum=12),
+            "executorCores": Param("6000m", type="string"),
+            "executorMemory": Param("10Gi", type="string"),
+            "callbackUrl": Param("", type="string")
+        },
 ) as dag:
 
     process_application_file = process_template()
@@ -87,9 +87,8 @@ with DAG(
         application_file="{{ task_instance.xcom_pull(key='return_value', task_ids='process_application_file') }}",
         do_xcom_push=True,
         dag=dag,
-        on_success_callback=on_success_download,
-        on_failure_callback=on_failure_download,
-        on_execute_callback=on_execute_download,
+        on_success_callback=on_execute_download,
+        on_failure_callback=on_failure_download
     )
 
     monitor_spark = SparkKubernetesSensor(
@@ -97,7 +96,9 @@ with DAG(
         namespace=Variable.get('namespace_to_run'),
         application_name="{{ task_instance.xcom_pull(task_ids='spark_submit')['metadata']['name'] }}",
         poke_interval=10,
-        dag=dag
+        dag=dag,
+        on_success_callback=on_success_download,
+        on_failure_callback=on_failure_download
     )
 
     process_application_file >> print_application_file >> start_spark >> monitor_spark
