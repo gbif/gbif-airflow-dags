@@ -48,12 +48,6 @@ with DAG(
         "version": Param("1.0.0", type="string"),
         "component": Param("gridded-datasets-spark", type="string"),
         "main": Param("org.gbif.gridded.datasets.GriddedDatasets", type="string"),
-        "hiveDatabase": Param("hive-db", type="string"),
-        "hiveTableOccurrence": Param("hive-table-occurrence", type="string"),
-        "jdbcUrl": Param("jdbc-url", type="string"),
-        "jdbcUser": Param("jdbc-user", type="string"),
-        "jdbcPassword": Param("jdbc-password", type="string"),
-        "jdbcTable": Param("jdbc-table", type="string"),
         "componentConfig": Param("gridded-datasets", type="string"),
         "driverCores": Param("2000m", type="string"),
         "driverMemory": Param("2Gi", type="string"),
@@ -72,7 +66,7 @@ with DAG(
         namespace = Variable.get('namespace_to_run'),
         application_file="{{ task_instance.xcom_pull(key='return_value', task_ids='process_application_file') }}",
         do_xcom_push=True,
-        dag=dag,
+        dag=dag
     )
 
     monitor_spark = SparkKubernetesSensor(
@@ -80,7 +74,7 @@ with DAG(
         namespace = Variable.get('namespace_to_run'),
         application_name="{{ task_instance.xcom_pull(task_ids='spark_submit')['metadata']['name'] }}",
         poke_interval=10,
-        dag=dag,
+        dag=dag
     )
 
     process_application_file >> print_application_file >> start_spark >> monitor_spark
