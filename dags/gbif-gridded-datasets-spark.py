@@ -45,7 +45,7 @@ with DAG(
     tags=['spark_executor', 'GBIF', 'gridded_datasets'],
     params= {
         "args": Param(["config.yaml"], type="array"),
-        "version": Param("1.0.0", type="string"),
+        "version": Param("1.0.6", type="string"),
         "component": Param("gridded-datasets", type="string"),
         "main": Param("org.gbif.gridded.datasets.GriddedDatasets", type="string"),
         "hdfsClusterName": Param("gbif-hdfs", type="string"),
