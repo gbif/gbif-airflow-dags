@@ -46,7 +46,7 @@ with DAG(
     params= {
         "args": Param(["/etc/gbif/config.yaml", "CREATE", "ALL"], type="array"),
         "version": Param("1.0.0", type="string"),
-        "component": Param("gridded-datasets-spark", type="string"),
+        "component": Param("gridded-datasets", type="string"),
         "main": Param("org.gbif.gridded.datasets.GriddedDatasets", type="string"),
         "hdfsClusterName": Param("gbif-hdfs", type="string"),
         "hiveClusterName": Param("gbif-hive-metastore", type="string"),
