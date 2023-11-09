@@ -44,7 +44,7 @@ with DAG(
     dagrun_timeout=timedelta(minutes=180),
     tags=['spark_executor', 'GBIF', 'gridded_datasets'],
     params= {
-        "args": Param(["/etc/gbif/config.yaml", "CREATE", "ALL"], type="array"),
+        "args": Param(["/etc/gbif/config.yaml"], type="array"),
         "version": Param("1.0.0", type="string"),
         "component": Param("gridded-datasets", type="string"),
         "main": Param("org.gbif.gridded.datasets.GriddedDatasets", type="string"),
