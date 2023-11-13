@@ -1,7 +1,7 @@
 apiVersion: spark.stackable.tech/v1alpha1
 kind: SparkApplication
 metadata:
-  name: {{ macros.uuid.uuid1() }}
+  name: {{ params.component }}-{{ macros.uuid.uuid1() }}
 spec:
   version: {{ params.version }}
   image: docker.gbif.org/{{ params.component }}:{{ params.version }}
@@ -30,8 +30,8 @@ spec:
      "spark.network.timeout": "60s"
      "spark.io.compression.codec": "lz4"
      "spark.rdd.compress": "true"
-     "spark.driver.extraClassPath": "/etc/hadoop/conf/:/stackable/spark/extra-jars/*"
-     "spark.executor.extraClassPath": "/etc/hadoop/conf/:/stackable/spark/extra-jars/*"
+     "spark.driver.extraClassPath": "/etc/hadoop/conf/:/stackable/spark/extra-jars/*:/etc/gbif/"
+     "spark.executor.extraClassPath": "/etc/hadoop/conf/:/stackable/spark/extra-jars/*:/etc/gbif/"
      "spark.kubernetes.authenticate.driver.serviceAccountName": "gbif-spark-sa"
 {%- endraw %}
   volumes:

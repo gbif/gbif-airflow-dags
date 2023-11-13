@@ -37,26 +37,26 @@ def print_processed_template(ti=None):
     print(processedTemplate)
 
 with DAG(
-    dag_id='gbif_occurrence_table_builder_dag',
-    schedule_interval='0 5 * * *',
-    start_date=datetime(2023, 7, 1),
+    dag_id='gbif_gridded_datasets_dag',
+    schedule_interval='0 1 * * 6',
+    start_date=datetime(2023, 11, 8),
     catchup=False,
     dagrun_timeout=timedelta(minutes=180),
-    tags=['spark_executor', 'GBIF', 'occurrence_table_builder'],
+    tags=['spark_executor', 'GBIF', 'gridded_datasets'],
     params= {
-        "args": Param(["/etc/gbif/config.yaml", "CREATE", "ALL"], type="array"),
-        "version": Param("1.0.20", type="string"),
-        "component": Param("occurrence-table-build-spark", type="string"),
-        "main": Param("org.gbif.occurrence.table.backfill.TableBackfill", type="string"),
+        "args": Param(["config.yaml"], type="array"),
+        "version": Param("1.0.6", type="string"),
+        "component": Param("gridded-datasets", type="string"),
+        "main": Param("org.gbif.gridded.datasets.GriddedDatasets", type="string"),
         "hdfsClusterName": Param("gbif-hdfs", type="string"),
         "hiveClusterName": Param("gbif-hive-metastore", type="string"),
         "hbaseClusterName": Param("gbif-hbase", type="string"),
-        "componentConfig": Param("occurrence-table-build", type="string"),
+        "componentConfig": Param("gridded-datasets", type="string"),
         "driverCores": Param("2000m", type="string"),
         "driverMemory": Param("2Gi", type="string"),
         "executorInstances": Param(6, type="integer", minimum=1, maximum=12),
         "executorCores": Param("6000m", type="string"),
-        "executorMemory": Param("10Gi", type="string")
+        "executorMemory": Param("8Gi", type="string")
     },
 ) as dag:
 
@@ -69,7 +69,7 @@ with DAG(
         namespace = Variable.get('namespace_to_run'),
         application_file="{{ task_instance.xcom_pull(key='return_value', task_ids='process_application_file') }}",
         do_xcom_push=True,
-        dag=dag,
+        dag=dag
     )
 
     monitor_spark = SparkKubernetesSensor(
@@ -77,7 +77,7 @@ with DAG(
         namespace = Variable.get('namespace_to_run'),
         application_name="{{ task_instance.xcom_pull(task_ids='spark_submit')['metadata']['name'] }}",
         poke_interval=10,
-        dag=dag,
+        dag=dag
     )
 
     process_application_file >> print_application_file >> start_spark >> monitor_spark
