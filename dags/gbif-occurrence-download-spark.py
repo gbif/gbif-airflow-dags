@@ -61,7 +61,7 @@ with DAG(
         tags=['spark_executor', 'GBIF', 'occurrence_download'],
         params= {
             "args": Param(["", "Occurrence"], type="array"),
-            "version": Param("1.0.22", type="string"),
+            "version": Param("0.194.0-H3-SNAPSHOT", type="string"),
             "component": Param("occurrence-download-spark", type="string"),
             "main": Param("org.gbif.occurrence.download.spark.SparkDownloads", type="string"),
             "hdfsClusterName": Param("gbif-hdfs", type="string"),
