@@ -5,7 +5,7 @@ metadata:
 spec:
   version: {{ params.version }}
   image: docker.gbif.org/{{ params.component }}:{{ params.version }}
-  sparkImage: docker.stackable.tech/stackable/spark-k8s:3.4.0-stackable23.7.0
+  sparkImage: docker.stackable.tech/stackable/spark-k8s:3.3.0-stackable23.7.0
   mode: cluster
   mainApplicationFile: local:///stackable/spark/jobs/{{ params.component }}.jar
   mainClass: {{ params.main }}
