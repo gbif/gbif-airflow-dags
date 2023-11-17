@@ -34,6 +34,7 @@ def update_download_status(dag_id, status, callback_url):
 
 def get_download_key(context):
     return context['run_id'].replace('download-','')
+
 def on_success_download(context):
     update_download_status(get_download_key(context),'SUCCEEDED', context["params"]["callbackUrl"])
 
@@ -41,7 +42,7 @@ def on_failure_download(context):
     update_download_status(get_download_key(context),'FAILED', context["params"]["callbackUrl"])
 
 def on_execute_download(context):
-    update_download_status(cget_download_key(context),'RUNNING', context["params"]["callbackUrl"])
+    update_download_status(get_download_key(context),'RUNNING', context["params"]["callbackUrl"])
 
 @task(task_id="process_application_file", templates_dict={"file": "templates/spark_job_download_template.yaml"}, templates_exts=[".yaml"])
 def process_template(**kwargs):
