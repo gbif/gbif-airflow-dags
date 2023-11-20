@@ -1,7 +1,7 @@
 apiVersion: spark.stackable.tech/v1alpha1
 kind: SparkApplication
 metadata:
-  name: {{ params.component }}-{{ macros.uuid.uuid1() }}
+  name: {{ params.component }}-{{ params.args[0] }}
 spec:
   version: {{ params.version }}
   image: docker.gbif.org/{{ params.component }}:{{ params.version }}
