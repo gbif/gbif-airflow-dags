@@ -28,7 +28,7 @@ from operators.stackable_spark_operator import SparkKubernetesOperator
 from sensors.stackable_spark_sensor import SparkKubernetesSensor
 
 @task(task_id="process_application_file", templates_dict={"file": "templates/spark_job_template.yaml"}, templates_exts=[".yaml"])
-def proces_template(**kwargs):
+def process_template(**kwargs):
     return str(kwargs["templates_dict"]["file"])
 
 @task(task_id="print_application_file")
@@ -60,7 +60,7 @@ with DAG(
     },
 ) as dag:
 
-    process_application_file = proces_template()
+    process_application_file = process_template()
 
     print_application_file = print_processed_template()
 
