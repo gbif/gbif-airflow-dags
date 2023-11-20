@@ -16,25 +16,14 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from datetime import datetime,timedelta
-
-from airflow.utils.trigger_rule import TriggerRule
 from airflow import DAG
-from airflow.decorators import task
 from airflow.models import Variable
 from airflow.models.param import Param
-
-from operators.stackable_spark_operator import SparkKubernetesOperator
-from sensors.stackable_spark_sensor import SparkKubernetesSensor
-
-@task(task_id="process_application_file", templates_dict={"file": "templates/spark_job_template.yaml"}, templates_exts=[".yaml"])
-def proces_template(**kwargs):
-    return str(kwargs["templates_dict"]["file"])
-
-@task(task_id="print_application_file")
-def print_processed_template(ti=None):
-    processedTemplate = ti.xcom_pull(key="return_value", task_ids="create_application_file")
-    print(processedTemplate)
+from airflow.utils.trigger_rule import TriggerRule
+from datetime import datetime,timedelta
+from params.default_params_for_spark import DefaultParamsForSpark
+from operators.custom_spark_operator import CustomSparkKubernetesOperator
+from sensors.extended_stackable_spark_sensor import ExtendedSparkKubernetesSensor
 
 with DAG(
     dag_id='gbif_map_points_builder_dag',
@@ -44,40 +33,27 @@ with DAG(
     dagrun_timeout=timedelta(minutes=180),
     tags=['spark_executor', 'GBIF', 'map_points'],
     params= {
-        "args": Param(["points", "/etc/gbif/config.yaml"], type="array"),
-        "version": Param("1.1.2", type="string"),
-        "component": Param("map-builder-spark", type="string"),
-        "main": Param("org.gbif.maps.spark.Backfill", type="string"),
-        "hdfsClusterName": Param("gbif-hdfs", type="string"),
-        "hiveClusterName": Param("gbif-hive-metastore", type="string"),
-        "hbaseClusterName": Param("gbif-hbase", type="string"),
-        "componentConfig": Param("gbif-map-builder-spark", type="string"),
-        "driverCores": Param("2000m", type="string"),
-        "driverMemory": Param("2Gi", type="string"),
-        "executorInstances": Param(6, type="integer", minimum=1, maximum=12),
-        "executorCores": Param("8000m", type="string"),
-        "executorMemory": Param("12Gi", type="string"),
+        "prepare": DefaultParamsForSpark.MAP_PREFLIGHT,
+        "calculate": DefaultParamsForSpark.MAP_POINTS,
+        "finalize": DefaultParamsForSpark.MAP_POSTFLIGHT,
     },
 ) as dag:
 
-    process_application_file = proces_template()
-
-    print_application_file = print_processed_template()
-
-    start_spark = SparkKubernetesOperator(
-        task_id='spark_submit',
+    spark_submit_calculate_stage = CustomSparkKubernetesOperator(
+        task_id='spark_submit_calculate_stage',
         namespace = Variable.get('namespace_to_run'),
-        application_file="{{ task_instance.xcom_pull(key='return_value', task_ids='process_application_file') }}",
+        application_file="spark_job_template.yaml",
+        custom_params="{{ params.calculate }}",
         do_xcom_push=True,
         dag=dag,
     )
 
-    monitor_spark = SparkKubernetesSensor(
-        task_id='spark_monitor',
+    spark_monitor_calculate_stage = ExtendedSparkKubernetesSensor(
+        task_id='spark_monitor_calculate_stage',
         namespace = Variable.get('namespace_to_run'),
-        application_name="{{ task_instance.xcom_pull(task_ids='spark_submit')['metadata']['name'] }}",
+        application_name="{{ task_instance.xcom_pull(task_ids='spark_submit_calculate_stage')['metadata']['name'] }}",
         poke_interval=10,
         dag=dag,
     )
 
-    process_application_file >> print_application_file >> start_spark >> monitor_spark
+    spark_submit_calculate_stage >> spark_monitor_calculate_stage
