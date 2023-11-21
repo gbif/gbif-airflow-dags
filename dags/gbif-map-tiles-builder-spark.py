@@ -33,9 +33,9 @@ with DAG(
     dagrun_timeout=timedelta(minutes=180),
     tags=['spark_executor', 'GBIF', 'map_tiles'],
     params= {
-        "prepare": DefaultParamsForSpark.MAP_PREFLIGHT,
+        "prepare": DefaultParamsForSpark.MAP_PREFLIGHT_TILES,
         "calculate": DefaultParamsForSpark.MAP_TILES,
-        "finalize": DefaultParamsForSpark.MAP_POSTFLIGHT,
+        "finalize": DefaultParamsForSpark.MAP_POSTFLIGHT_TILES,
     },
 ) as dag:
 

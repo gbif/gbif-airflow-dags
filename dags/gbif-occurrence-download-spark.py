@@ -44,22 +44,21 @@ def on_execute_download(context):
     update_download_status(get_download_key(context),'RUNNING', context["params"]["callbackUrl"])
 
 with DAG(
-    dag_id='gbif_occurrence_table_build_dag',
+    dag_id='gbif_occurrence_download_dag',
     schedule_interval='0 5 * * *',
     start_date=datetime(2023, 7, 1),
     catchup=False,
     dagrun_timeout=timedelta(minutes=180),
-    tags=['spark_executor', 'GBIF', 'occurrence_table_build'],
-    params= {
-        "main": DefaultParamsForSpark.OCCURRENCE_DOWNLOAD,
-    },
+    tags=['spark_executor', 'GBIF', 'occurrence_download'],
+    params= DefaultParamsForSpark.OCCURRENCE_DOWNLOAD,
 ) as dag:
 
     spark_submit_main_stage = CustomSparkKubernetesOperator(
         task_id='spark_submit_main_stage',
         namespace = Variable.get('namespace_to_run'),
         application_file="spark_job_template.yaml",
-        custom_params="{{ params.main }}",
+        custom_params="{{ params }}",
+        computed_name="dwnld-{{ params.args[0] }}",
         do_xcom_push=True,
         dag=dag,
         on_success_callback=on_success_download,

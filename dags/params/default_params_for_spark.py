@@ -17,41 +17,88 @@
 # under the License.
 
 class DefaultParamsForSpark:
+    MAP_BASE: object = {
+        "version": "0.37.0-SNAPSHOT",
+        "component": "spark-generate",
+        "hdfsClusterName": "gbif-hdfs",
+        "hiveClusterName": "gbif-hive-metastore",
+        "hbaseClusterName": "gbif-hbase",
+        "componentConfig": "spark-generate-maps",
+    }
+
+    MAP_FLIGHT: object = {
+        "driverCores": "2000m",
+        "driverMemory": "2Gi",
+        "executorInstances": 1,
+        "executorCores": "2000m",
+        "executorMemory": "2Gi",
+    }
+
     MAP_TILES: object = {
-        "sparkName": "map-builder-tiles",
-        "args": ["tiles", "/etc/gbif/config.yaml"],
-        "version": "1.1.2",
-        "component": "map-builder-spark",
-        "main": "org.gbif.maps.spark.Backfill",
-        "hdfsClusterName": "gbif-hdfs",
-        "hiveClusterName": "gbif-hive-metastore",
-        "hbaseClusterName": "gbif-hbase",
-        "componentConfig": "gbif-map-builder-spark",
+        "sparkName": "generate-map-tiles",
+        "args": ["tiles", "config.yaml"],
+        "main": "org.gbif.maps.workflow.Backfill",
         "driverCores": "2000m",
         "driverMemory": "2Gi",
         "executorInstances": 6,
         "executorCores": "8000m",
         "executorMemory": "12Gi",
     }
+
+    MAP_TILES.update(MAP_BASE)
+
     MAP_POINTS: object = {
-        "sparkName": "map-builder-points",
-        "args": ["points", "/etc/gbif/config.yaml"],
-        "version": "1.1.2",
-        "component": "map-builder-spark",
-        "main": "org.gbif.maps.spark.Backfill",
-        "hdfsClusterName": "gbif-hdfs",
-        "hiveClusterName": "gbif-hive-metastore",
-        "hbaseClusterName": "gbif-hbase",
-        "componentConfig": "gbif-map-builder-spark",
+        "sparkName": "generate-map-points",
+        "args": ["points", "config.yaml"],
+        "main": "org.gbif.maps.workflow.Backfill",
         "driverCores": "2000m",
         "driverMemory": "2Gi",
         "executorInstances": 6,
         "executorCores": "8000m",
         "executorMemory": "12Gi",
     }
+
+    MAP_POINTS.update(MAP_BASE)
+
+    MAP_PREFLIGHT_POINTS: object = {
+        "sparkName": "generate-map-point-pre",
+        "args": ["points", "config.yaml"],
+        "main": "org.gbif.maps.workflow.PrepareBackfill",
+    }
+
+    MAP_PREFLIGHT_POINTS.update(MAP_BASE)
+    MAP_PREFLIGHT_POINTS.update(MAP_FLIGHT)
+
+    MAP_POSTFLIGHT_POINTS: object = {
+        "sparkName": "map-build-point-post",
+        "args": ["points", "config.yaml"],
+        "main": "org.gbif.maps.workflow.FinaliseBackfill",
+    }
+
+    MAP_POSTFLIGHT_POINTS.update(MAP_BASE)
+    MAP_POSTFLIGHT_POINTS.update(MAP_FLIGHT)
+
+    MAP_PREFLIGHT_TILES: object = {
+        "sparkName": "generate-map-tiles-pre",
+        "args": ["tiles", "config.yaml"],
+        "main": "org.gbif.maps.workflow.PrepareBackfill",
+    }
+
+    MAP_PREFLIGHT_TILES.update(MAP_BASE)
+    MAP_PREFLIGHT_TILES.update(MAP_FLIGHT)
+
+    MAP_POSTFLIGHT_TILES: object = {
+        "sparkName": "map-build-tiles-post",
+        "args": ["tiles", "config.yaml"],
+        "main": "org.gbif.maps.workflow.FinaliseBackfill",
+    }
+
+    MAP_POSTFLIGHT_TILES.update(MAP_BASE)
+    MAP_POSTFLIGHT_TILES.update(MAP_FLIGHT)
+
     OCCURRENCE_TABLE_BUILD: object = {
         "sparkName": "occurrence-table-build",
-        "args": ["points", "/etc/gbif/config.yaml", "CREATE", "ALL"],
+        "args": ["/etc/gbif/config.yaml", "CREATE", "ALL"],
         "version": "1.0.20",
         "component": "occurrence-table-build-spark",
         "main": "org.gbif.occurrence.table.backfill.TableBackfill",
@@ -65,8 +112,9 @@ class DefaultParamsForSpark:
         "executorCores": "6000m",
         "executorMemory": "10Gi",
     }
+
     OCCURRENCE_DOWNLOAD: object = {
-        "sparkName": "map-builder-points",
+        "sparkName": "occurrence-downloads",
         "args": ["", "Occurrence"],
         "version": "0.194.0S",
         "component": "occurrence-download-spark",
@@ -74,7 +122,11 @@ class DefaultParamsForSpark:
         "hdfsClusterName": "gbif-hdfs",
         "hiveClusterName": "gbif-hive-metastore",
         "hbaseClusterName": "gbif-hbase",
-        "componentConfig": "gbif-map-builder-spark",
+        "componentProperty": {
+            "propertyName": "occurrence",
+            "path": "/stackable/spark/jobs/",
+            "file": "download.properties",
+        },
         "driverCores": "2000m",
         "driverMemory": "2Gi",
         "executorInstances": 6,
@@ -82,6 +134,7 @@ class DefaultParamsForSpark:
         "executorMemory": "10Gi",
         "callbackUrl": "",
     }
+
     GRIDDED_DATASETS: object = {
         "sparkName": "gridded-datasets",
         "args": ["config.yaml"],

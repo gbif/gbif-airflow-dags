@@ -33,18 +33,44 @@ with DAG(
     dagrun_timeout=timedelta(minutes=180),
     tags=['spark_executor', 'GBIF', 'map_points'],
     params= {
-        "prepare": DefaultParamsForSpark.MAP_PREFLIGHT,
+        "prepare": DefaultParamsForSpark.MAP_PREFLIGHT_POINTS,
         "calculate": DefaultParamsForSpark.MAP_POINTS,
-        "finalize": DefaultParamsForSpark.MAP_POSTFLIGHT,
+        "finalize": DefaultParamsForSpark.MAP_POSTFLIGHT_POINTS,
     },
 ) as dag:
+
+    spark_submit_prepare_stage = CustomSparkKubernetesOperator(
+        task_id='spark_submit_prepare_stage',
+        namespace = Variable.get('namespace_to_run'),
+        application_file="spark_job_using_local_hdfs_jar.yaml",
+        custom_params="{{ params.prepare }}",
+        do_xcom_push=True,
+        dag=dag,
+    )
 
     spark_submit_calculate_stage = CustomSparkKubernetesOperator(
         task_id='spark_submit_calculate_stage',
         namespace = Variable.get('namespace_to_run'),
-        application_file="spark_job_template.yaml",
+        application_file="spark_job_using_local_hdfs_jar.yaml",
         custom_params="{{ params.calculate }}",
         do_xcom_push=True,
+        dag=dag,
+    )
+
+    spark_submit_finalize_stage = CustomSparkKubernetesOperator(
+        task_id='spark_submit_finalize_stage',
+        namespace = Variable.get('namespace_to_run'),
+        application_file="spark_job_using_local_hdfs_jar.yaml",
+        custom_params="{{ params.finalize }}",
+        do_xcom_push=True,
+        dag=dag,
+    )
+
+    spark_monitor_prepare_stage = ExtendedSparkKubernetesSensor(
+        task_id='spark_monitor_prepare_stage',
+        namespace = Variable.get('namespace_to_run'),
+        application_name="{{ task_instance.xcom_pull(task_ids='spark_submit_prepare_stage')['metadata']['name'] }}",
+        poke_interval=10,
         dag=dag,
     )
 
@@ -56,4 +82,12 @@ with DAG(
         dag=dag,
     )
 
-    spark_submit_calculate_stage >> spark_monitor_calculate_stage
+    spark_monitor_finalize_stage = ExtendedSparkKubernetesSensor(
+        task_id='spark_monitor_finalize_stage',
+        namespace = Variable.get('namespace_to_run'),
+        application_name="{{ task_instance.xcom_pull(task_ids='spark_submit_finalize_stage')['metadata']['name'] }}",
+        poke_interval=10,
+        dag=dag,
+    )
+
+    spark_submit_prepare_stage >> spark_monitor_prepare_stage >> spark_submit_calculate_stage >> spark_monitor_calculate_stage >> spark_submit_finalize_stage >> spark_monitor_finalize_stage
