@@ -44,6 +44,8 @@ with DAG(
         namespace = Variable.get('namespace_to_run'),
         application_file="spark_job_using_local_hdfs_jar.yaml",
         custom_params="{{ params.prepare }}",
+        timestamp="{{ ts_nodash }}",
+        pass_timestamp_as_args=True,
         do_xcom_push=True,
         dag=dag,
     )
@@ -53,6 +55,8 @@ with DAG(
         namespace = Variable.get('namespace_to_run'),
         application_file="spark_job_using_local_hdfs_jar.yaml",
         custom_params="{{ params.calculate }}",
+        timestamp="{{ ts_nodash }}",
+        pass_timestamp_as_args=True,
         do_xcom_push=True,
         dag=dag,
     )
@@ -62,6 +66,8 @@ with DAG(
         namespace = Variable.get('namespace_to_run'),
         application_file="spark_job_using_local_hdfs_jar.yaml",
         custom_params="{{ params.finalize }}",
+        timestamp="{{ ts_nodash }}",
+        pass_timestamp_as_args=True,
         do_xcom_push=True,
         dag=dag,
     )

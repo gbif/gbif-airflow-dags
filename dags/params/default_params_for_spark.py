@@ -16,7 +16,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from datetime import datetime
+
 class DefaultParamsForSpark:
+        
     MAP_BASE: object = {
         "version": "0.37.0-SNAPSHOT",
         "component": "spark-generate",
@@ -70,7 +73,7 @@ class DefaultParamsForSpark:
     MAP_PREFLIGHT_POINTS.update(MAP_FLIGHT)
 
     MAP_POSTFLIGHT_POINTS: object = {
-        "sparkName": "map-build-point-post",
+        "sparkName": "generate-map-points-post",
         "args": ["points", "config.yaml"],
         "main": "org.gbif.maps.workflow.FinaliseBackfill",
     }
@@ -88,7 +91,7 @@ class DefaultParamsForSpark:
     MAP_PREFLIGHT_TILES.update(MAP_FLIGHT)
 
     MAP_POSTFLIGHT_TILES: object = {
-        "sparkName": "map-build-tiles-post",
+        "sparkName": "generate-map-tiles-post",
         "args": ["tiles", "config.yaml"],
         "main": "org.gbif.maps.workflow.FinaliseBackfill",
     }

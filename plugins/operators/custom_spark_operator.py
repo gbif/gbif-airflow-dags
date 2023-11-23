@@ -48,8 +48,9 @@ class CustomSparkKubernetesOperator(BaseOperator):
         kubernetes_conn_id: str = 'kubernetes_in_cluster',  
         api_group: str = 'spark.stackable.tech',
         api_version: str = 'v1alpha1',
-        timestamp: str = '{{ ts_nodash }}',
+        timestamp: str = None,
         computed_name: str = None,
+        pass_timestamp_as_args: bool = False,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -62,6 +63,7 @@ class CustomSparkKubernetesOperator(BaseOperator):
         self.plural = "sparkapplications"
         self.timestamp = timestamp
         self.computed_name = computed_name
+        self.pass_timestamp_as_args = pass_timestamp_as_args
 
     def procesTemplate(self, template, custom_params):
         # As the custom_params gets passed in as a string at runtime to the operator we need to sanitize the string so the json lib can convert it into a dictonary
@@ -73,6 +75,9 @@ class CustomSparkKubernetesOperator(BaseOperator):
         if self.computed_name != None:
             # Adding a computed name based to the dict for the template
             params_as_dict.update({"computed_name": self.computed_name})
+        if self.pass_timestamp_as_args == True:
+            # Adding timestamp in at the end of the args string
+            params_as_dict["args"].append(self.timestamp)
         if custom_params != None:
             with open('dags/templates/' + template) as file_:
                 sparkApptemplate = Template(file_.read())
