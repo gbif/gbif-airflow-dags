@@ -42,7 +42,7 @@ with DAG(
     spark_submit_prepare_stage = CustomSparkKubernetesOperator(
         task_id='spark_submit_prepare_stage',
         namespace = Variable.get('namespace_to_run'),
-        application_file="spark_job_using_local_hdfs_jar.yaml",
+        application_file="spark_job_template.yaml",
         custom_params="{{ params.prepare }}",
         timestamp="{{ ts_nodash }}",
         pass_timestamp_as_args=True,
@@ -53,7 +53,7 @@ with DAG(
     spark_submit_calculate_stage = CustomSparkKubernetesOperator(
         task_id='spark_submit_calculate_stage',
         namespace = Variable.get('namespace_to_run'),
-        application_file="spark_job_using_local_hdfs_jar.yaml",
+        application_file="spark_job_template.yaml",
         custom_params="{{ params.calculate }}",
         timestamp="{{ ts_nodash }}",
         pass_timestamp_as_args=True,
@@ -64,7 +64,7 @@ with DAG(
     spark_submit_finalize_stage = CustomSparkKubernetesOperator(
         task_id='spark_submit_finalize_stage',
         namespace = Variable.get('namespace_to_run'),
-        application_file="spark_job_using_local_hdfs_jar.yaml",
+        application_file="spark_job_template.yaml",
         custom_params="{{ params.finalize }}",
         timestamp="{{ ts_nodash }}",
         pass_timestamp_as_args=True,

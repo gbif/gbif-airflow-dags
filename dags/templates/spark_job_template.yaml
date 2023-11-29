@@ -13,7 +13,7 @@ metadata:
 spec:
   version: {{ version }}
   image: docker.gbif.org/{{ component }}:{{ version }}
-  sparkImage: docker.stackable.tech/stackable/spark-k8s:3.3.0-stackable23.7.0
+  sparkImage: docker.stackable.tech/stackable/spark-k8s:3.4.0-stackable23.7.0
   mode: cluster
   mainApplicationFile: local:///stackable/spark/jobs/{{ component }}.jar
   mainClass: {{ main }}
@@ -21,11 +21,6 @@ spec:
 {%- for arg in args %}
     - "{{arg}}"
 {%- endfor %}
-  deps:
-    repositories:
-      - https://repository.gbif.org/repository/central/
-    packages:
-      - org.apache.spark:spark-avro_2.12:3.4.0
   sparkConf:
 {%- raw %}
      "spark.driver.extraJavaOptions": "-XX:+UseConcMarkSweepGC"

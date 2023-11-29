@@ -56,7 +56,7 @@ with DAG(
     spark_submit_main_stage = CustomSparkKubernetesOperator(
         task_id='spark_submit_main_stage',
         namespace = Variable.get('namespace_to_run'),
-        application_file="spark_job_template.yaml",
+        application_file="spark_job_template_spark3_3.yaml",
         custom_params="{{ params }}",
         computed_name="dwnld-{{ params.args[0] }}",
         do_xcom_push=True,
