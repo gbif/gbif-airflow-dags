@@ -32,9 +32,8 @@ with DAG(
     catchup=False,
     dagrun_timeout=timedelta(minutes=180),
     tags=['spark_executor', 'GBIF', 'gridded_datasets'],
-    params= {
-        "main": DefaultParamsForSpark.GRIDDED_DATASETS,
-    },
+    params= DefaultParamsForSpark.GRIDDED_DATASETS,
+    
 ) as dag:
 
     spark_submit_main_stage = CustomSparkKubernetesOperator(
