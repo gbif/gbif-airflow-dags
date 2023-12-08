@@ -50,7 +50,7 @@ with DAG(
     catchup=False,
     dagrun_timeout=timedelta(minutes=180),
     tags=['spark_executor', 'GBIF', 'occurrence_download'],
-    params= DefaultParamsForSpark.OCCURRENCE_DOWNLOAD,
+    params = DefaultParamsForSpark.OCCURRENCE_DOWNLOAD,
 ) as dag:
 
     spark_submit_main_stage = CustomSparkKubernetesOperator(

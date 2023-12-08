@@ -21,7 +21,7 @@ from airflow.models import Variable
 from airflow.models.param import Param
 from airflow.utils.trigger_rule import TriggerRule
 from datetime import datetime,timedelta
-from params.default_params_for_spark import DefaultParamsForSpark
+from gparams.default_params_for_spark import DefaultParamsForSpark
 from operators.custom_spark_operator import CustomSparkKubernetesOperator
 from sensors.extended_stackable_spark_sensor import ExtendedSparkKubernetesSensor
 
@@ -32,7 +32,7 @@ with DAG(
     catchup=False,
     dagrun_timeout=timedelta(minutes=180),
     tags=['spark_executor', 'GBIF', 'map_tiles'],
-    params= {
+    params = {
         "prepare": DefaultParamsForSpark.MAP_PREFLIGHT_TILES,
         "calculate": DefaultParamsForSpark.MAP_TILES,
         "finalize": DefaultParamsForSpark.MAP_POSTFLIGHT_TILES,
