@@ -16,10 +16,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# DEPRECATED in favor of extended_stackable_spark_sensor
-
 # The code is found in Stackable documentation for Airflow usage: https://docs.stackable.tech/airflow/stable/usage.html
-"""Spark-in-k8 sensor implemented by the Stackable team"""
+"""Extension of the Spark-in-k8 sensor implemented by the Stackable team"""
 
 from typing import TYPE_CHECKING, Optional, Dict
 from kubernetes import client
@@ -27,7 +25,7 @@ from airflow.exceptions import AirflowException
 from airflow.sensors.base import BaseSensorOperator
 from airflow.providers.cncf.kubernetes.hooks.kubernetes import KubernetesHook, _load_body_to_dict
 
-class SparkKubernetesSensor(BaseSensorOperator):  
+class ExtendedSparkKubernetesSensor(BaseSensorOperator):  
     """
     Monitors a SparkApplication resource in kubernetes:
     :param application_name: SparkApplication resource name
@@ -48,6 +46,7 @@ class SparkKubernetesSensor(BaseSensorOperator):
             *,
             application_name: str,
             attach_log: bool = False,
+            clean_up_after_run: bool = False,
             namespace: Optional[str] = None,
             kubernetes_conn_id: str = 'kubernetes_in_cluster',  
             api_group: str = 'spark.stackable.tech',
@@ -66,6 +65,7 @@ class SparkKubernetesSensor(BaseSensorOperator):
         self.api_version = api_version
         self.poke_interval = poke_interval
         self.plural = plural
+        self.clean_up_after_run = clean_up_after_run
 
     def _log_driver(self, application_state: str, response: dict) -> None:
         if not self.attach_log:
@@ -113,12 +113,17 @@ class SparkKubernetesSensor(BaseSensorOperator):
             raise AirflowException(f"SparkApplication failed with state: {application_state}")
         elif application_state in self.SUCCESS_STATES:
             self.log.info("SparkApplication ended successfully")
+            if self.clean_up_after_run == True:
+                self.clean_up()
             return True
         else:
             self.log.info("SparkApplication is still in state: %s", application_state)
             return False
 
     def on_kill(self) -> None:
+        self.clean_up()
+
+    def clean_up(self) -> None:
         self.log.info("Cleaning up after Sparkapplication")
         name = self.application_name
         namespace = self.namespace

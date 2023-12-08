@@ -16,24 +16,21 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# DEPRECATED in favor of custom_spark_sensor
-
-# The code is found in Stackable documentation for Airflow usage: https://docs.stackable.tech/airflow/stable/usage.html
-"""Spark-in-k8 operator implemented by the Stackable team"""
-
-from typing import TYPE_CHECKING, Optional, Sequence, Dict
 from airflow.models import BaseOperator
 from airflow.providers.cncf.kubernetes.hooks.kubernetes import KubernetesHook,_load_body_to_dict
+from datetime import datetime,timedelta
+from jinja2 import Template
+import json
+from typing import TYPE_CHECKING, Optional, Sequence, Dict
 
 if TYPE_CHECKING:
     from airflow.utils.context import Context
 
-
-class SparkKubernetesOperator(BaseOperator):  
+class CustomSparkKubernetesOperator(BaseOperator):  
     """
     Creates a SparkApplication resource in kubernetes:
-    :param application_file: Defines a 'SparkApplication' custom resource as either a
-        path to a '.yaml' file, '.json' file, YAML string or JSON string.
+    :param application_file: Defines a file name of avaiable templates to load
+    :param custom_params: A json object containing the values to use while templating
     :param namespace: kubernetes namespace for the SparkApplication
     :param kubernetes_conn_id: The :ref:`kubernetes connection id <howto/connection:kubernetes>`
         for the Kubernetes cluster.
@@ -41,27 +38,54 @@ class SparkKubernetesOperator(BaseOperator):
     :param api_version: SparkApplication API version
     """
 
-    template_fields: Sequence[str] = ('application_file', 'namespace')
-    template_ext: Sequence[str] = ('.yaml', '.yml', '.json')
-    ui_color = '#f4a460'
-
+    template_fields : Sequence[str] = ('custom_params', 'timestamp', 'computed_name')
     def __init__(
         self,
         *,
-        application_file: str,
+        application_file: Optional[str] = "default.yaml",
+        custom_params: object = None,
         namespace: Optional[str] = None,
         kubernetes_conn_id: str = 'kubernetes_in_cluster',  
         api_group: str = 'spark.stackable.tech',
         api_version: str = 'v1alpha1',
+        timestamp: str = None,
+        computed_name: str = None,
+        pass_timestamp_as_args: bool = False,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.application_file = application_file
+        self.custom_params = custom_params
         self.namespace = namespace
         self.kubernetes_conn_id = kubernetes_conn_id
         self.api_group = api_group
         self.api_version = api_version
         self.plural = "sparkapplications"
+        self.timestamp = timestamp
+        self.computed_name = computed_name
+        self.pass_timestamp_as_args = pass_timestamp_as_args
+
+    def procesTemplate(self, template, custom_params):
+        # As the custom_params gets passed in as a string at runtime to the operator we need to sanitize the string so the json lib can convert it into a dictonary
+        params_as_dict = json.loads(custom_params.replace("\'", "\""))
+        self.log.info(params_as_dict)
+        if self.timestamp != None:
+            # Adding the datatime to the dict for the template
+            params_as_dict.update({"timestamp": self.timestamp})
+        if self.computed_name != None:
+            # Adding a computed name based to the dict for the template
+            params_as_dict.update({"computed_name": self.computed_name})
+        if self.pass_timestamp_as_args == True:
+            # Adding timestamp in at the end of the args string
+            params_as_dict["args"].append(self.timestamp)
+        if custom_params != None:
+            with open('dags/templates/' + template) as file_:
+                sparkApptemplate = Template(file_.read())
+            return_value = str(sparkApptemplate.render(params_as_dict))
+            self.log.info(return_value)
+            return return_value
+        else:
+            self.log.warn("No params were passed to the operator, won't process template")
 
     def execute(self, context: 'Context'):
         hook = KubernetesHook(conn_id=self.kubernetes_conn_id)
@@ -70,20 +94,7 @@ class SparkKubernetesOperator(BaseOperator):
             group=self.api_group,
             version=self.api_version,
             plural=self.plural,
-            body=self.application_file,
+            body=self.procesTemplate(self.application_file, self.custom_params),
             namespace=self.namespace,
         )
         return response
-
-    def on_kill(self) -> None:
-        hook = KubernetesHook(conn_id=self.kubernetes_conn_id)
-        body = _load_body_to_dict(self.application_file)
-        name = body["metadata"]["name"]
-        namespace = self.namespace or hook.get_namespace()
-        self.hook.delete_custom_object(
-            group=self.api_group,
-            version=self.api_version,
-            plural=self.plural,
-            namespace=namespace,
-            name=name,
-        )

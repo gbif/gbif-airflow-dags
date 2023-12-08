@@ -16,25 +16,14 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from datetime import datetime,timedelta
-
-from airflow.utils.trigger_rule import TriggerRule
 from airflow import DAG
-from airflow.decorators import task
 from airflow.models import Variable
 from airflow.models.param import Param
-
-from operators.stackable_spark_operator import SparkKubernetesOperator
-from sensors.stackable_spark_sensor import SparkKubernetesSensor
-
-@task(task_id="process_application_file", templates_dict={"file": "templates/spark_job_template.yaml"}, templates_exts=[".yaml"])
-def process_template(**kwargs):
-    return str(kwargs["templates_dict"]["file"])
-
-@task(task_id="print_application_file")
-def print_processed_template(ti=None):
-    processedTemplate = ti.xcom_pull(key="return_value", task_ids="create_application_file")
-    print(processedTemplate)
+from airflow.utils.trigger_rule import TriggerRule
+from datetime import datetime,timedelta
+from params.default_params_for_spark import DefaultParamsForSpark
+from operators.custom_spark_operator import CustomSparkKubernetesOperator
+from sensors.extended_stackable_spark_sensor import ExtendedSparkKubernetesSensor
 
 with DAG(
     dag_id='gbif_gridded_datasets_dag',
@@ -43,41 +32,25 @@ with DAG(
     catchup=False,
     dagrun_timeout=timedelta(minutes=180),
     tags=['spark_executor', 'GBIF', 'gridded_datasets'],
-    params= {
-        "args": Param(["config.yaml"], type="array"),
-        "version": Param("1.1.0-SNAPSHOT", type="string"),
-        "component": Param("gridded-datasets", type="string"),
-        "main": Param("org.gbif.gridded.datasets.GriddedDatasets", type="string"),
-        "hdfsClusterName": Param("gbif-hdfs", type="string"),
-        "hiveClusterName": Param("gbif-hive-metastore", type="string"),
-        "hbaseClusterName": Param("gbif-hbase", type="string"),
-        "componentConfig": Param("gridded-datasets", type="string"),
-        "driverCores": Param("2000m", type="string"),
-        "driverMemory": Param("2Gi", type="string"),
-        "executorInstances": Param(6, type="integer", minimum=1, maximum=12),
-        "executorCores": Param("6000m", type="string"),
-        "executorMemory": Param("8Gi", type="string")
-    },
+    params= DefaultParamsForSpark.GRIDDED_DATASETS,
+    
 ) as dag:
 
-    process_application_file = process_template()
-
-    print_application_file = print_processed_template()
-
-    start_spark = SparkKubernetesOperator(
-        task_id='spark_submit',
+    spark_submit_main_stage = CustomSparkKubernetesOperator(
+        task_id='spark_submit_main_stage',
         namespace = Variable.get('namespace_to_run'),
-        application_file="{{ task_instance.xcom_pull(key='return_value', task_ids='process_application_file') }}",
+        application_file="spark_job_template.yaml",
+        custom_params="{{ params.main }}",
         do_xcom_push=True,
-        dag=dag
+        dag=dag,
     )
 
-    monitor_spark = SparkKubernetesSensor(
-        task_id='spark_monitor',
+    spark_monitor_main_stage = ExtendedSparkKubernetesSensor(
+        task_id='spark_monitor_main_stage',
         namespace = Variable.get('namespace_to_run'),
-        application_name="{{ task_instance.xcom_pull(task_ids='spark_submit')['metadata']['name'] }}",
+        application_name="{{ task_instance.xcom_pull(task_ids='spark_submit_main_stage')['metadata']['name'] }}",
         poke_interval=10,
-        dag=dag
+        dag=dag,
     )
 
-    process_application_file >> print_application_file >> start_spark >> monitor_spark
+    spark_submit_main_stage >> spark_monitor_main_stage

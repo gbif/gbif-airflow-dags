@@ -1,16 +1,24 @@
 apiVersion: spark.stackable.tech/v1alpha1
 kind: SparkApplication
+{% if timestamp is defined and computed_name is not defined %}
 metadata:
-  name: dwnld-{{ params.args[0] }}
+  name: {{ sparkName.lower() }}-{{ timestamp.lower() }}
+{% elif computed_name is defined %}
+metadata:
+  name: {{ computed_name.lower() }}
+{% else %}
+metadata:
+  name: {{ sparkName }}
+{% endif %}
 spec:
-  version: {{ params.version }}
-  image: docker.gbif.org/{{ params.component }}:{{ params.version }}
+  version: {{ version }}
+  image: docker.gbif.org/{{ component }}:{{ version }}
   sparkImage: docker.stackable.tech/stackable/spark-k8s:3.3.0-stackable23.7.0
   mode: cluster
-  mainApplicationFile: local:///stackable/spark/jobs/{{ params.component }}.jar
-  mainClass: {{ params.main }}
+  mainApplicationFile: local:///stackable/spark/jobs/{{ component }}.jar
+  mainClass: {{ main }}
   args:
-{%- for arg in params.args %}
+{%- for arg in args %}
     - "{{arg}}"
 {%- endfor %}
   deps:
@@ -30,78 +38,119 @@ spec:
      "spark.network.timeout": "60s"
      "spark.io.compression.codec": "lz4"
      "spark.rdd.compress": "true"
-     "spark.driver.extraClassPath": "/etc/hadoop/conf/:/stackable/spark/extra-jars/*:/stackable/spark/jobs/"
-     "spark.executor.extraClassPath": "/etc/hadoop/conf/:/stackable/spark/extra-jars/*:/stackable/spark/jobs/"
+     "spark.driver.extraClassPath": "/etc/hadoop/conf/:/etc/gbif/:/stackable/spark/extra-jars/*"
+     "spark.executor.extraClassPath": "/etc/hadoop/conf/:/etc/gbif/:/stackable/spark/extra-jars/*"
      "spark.kubernetes.authenticate.driver.serviceAccountName": "gbif-spark-sa"
 {%- endraw %}
+{% if componentConfig is defined or hdfsClusterName is defined or hiveClusterName is defined or hbaseClusterName is defined %}
   volumes:
+{% if componentConfig is defined %}
     - name: gbif-config
       configMap:
-        name: {{ params.componentConfig }}-conf
+        name: {{ componentConfig }}-conf
+{% endif %}
+{% if componentProperty is defined %}
+    - name: gbif-property
+      configMap:
+        name: {{ componentProperty.propertyName }}-conf
+{% endif %}
+{% if hdfsClusterName is defined %}
     - name: hdfs-env
       configMap:
-        name: {{ params.hdfsClusterName }}
+        name: {{ hdfsClusterName }}
         items:
         - key: core-site.xml
           path: core-site.xml
         - key: hdfs-site.xml
           path: hdfs-site.xml
+{% endif %}
+{% if hiveClusterName is defined %}
     - name: hive-env
       configMap:
-        name: {{ params.hiveClusterName }}-custom
+        name: {{ hiveClusterName }}-custom
         items:
         - key: hive-site.xml
           path: hive-site.xml
+{% endif %}
+{% if hbaseClusterName is defined %}
     - name: hbase-env
       configMap:
-        name: {{ params.hbaseClusterName }}
+        name: {{ hbaseClusterName }}
         items:
         - key: hbase-site.xml
           path: hbase-site.xml
+{% endif %}
+{% endif %}
   driver:
     resources:
       cpu:
         min: "100m"
-        max: "{{ params.driverCores }}"
+        max: "{{ driverCores }}"
       memory:
-        limit: "{{ params.driverMemory }}"
+        limit: "{{ driverMemory }}"
     volumeMounts:
+{% if componentConfig is defined %}
       - name: gbif-config
-        mountPath: /stackable/spark/jobs/download.properties
-        subPath: download.properties
+        mountPath: /etc/gbif/config.yaml
+        subPath: config.yaml
+{% endif %}
+{% if componentProperty is defined %}
+    - name: gbif-property
+      mountPath: {{ componentProperty.path }}{{ componentProperty.file }}
+      subPath: {{ componentProperty.file }}
+{% endif %}
+{% if hdfsClusterName is defined %}
       - name: hdfs-env
         mountPath: /etc/hadoop/conf/core-site.xml
         subPath: core-site.xml
       - name: hdfs-env
         mountPath: /etc/hadoop/conf/hdfs-site.xml
         subPath: hdfs-site.xml
+{% endif %}
+{% if hiveClusterName is defined %}
       - name: hive-env
         mountPath: /etc/hadoop/conf/hive-site.xml
         subPath: hive-site.xml
+{% endif %}
+{% if hbaseClusterName is defined %}
       - name: hbase-env
         mountPath: /etc/hadoop/conf/hbase-site.xml
         subPath: hbase-site.xml
+{% endif %}
   executor:
-    instances: {{ params.executorInstances }}
+    instances: {{ executorInstances }}
     resources:
       cpu:
         min: "100m"
-        max: "{{ params.executorCores }}"
+        max: "{{ executorCores }}"
       memory:
-        limit: "{{ params.executorMemory }}"
+        limit: "{{ executorMemory }}"
     volumeMounts:
+{% if componentConfig is defined %}
       - name: gbif-config
-        mountPath: /stackable/spark/jobs/download.properties
-        subPath: download.properties
+        mountPath: /etc/gbif/config.yaml
+        subPath: config.yaml
+{% endif %}
+{% if componentProperty is defined %}
+    - name: gbif-property
+      mountPath: {{ componentProperty.path }}{{ componentProperty.file }}
+      subPath: {{ componentProperty.file }}
+{% endif %}
+{% if hdfsClusterName is defined %}
       - name: hdfs-env
         mountPath: /etc/hadoop/conf/core-site.xml
         subPath: core-site.xml
       - name: hdfs-env
         mountPath: /etc/hadoop/conf/hdfs-site.xml
         subPath: hdfs-site.xml
+{% endif %}
+{% if hiveClusterName is defined %}
       - name: hive-env
         mountPath: /etc/hadoop/conf/hive-site.xml
         subPath: hive-site.xml
+{% endif %}
+{% if hbaseClusterName is defined %}
       - name: hbase-env
         mountPath: /etc/hadoop/conf/hbase-site.xml
         subPath: hbase-site.xml
+{% endif %}
