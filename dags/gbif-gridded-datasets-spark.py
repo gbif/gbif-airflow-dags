@@ -40,7 +40,7 @@ with DAG(
         task_id='spark_submit_main_stage',
         namespace = Variable.get('namespace_to_run'),
         application_file="spark_job_template.yaml",
-        custom_params="{{ params.main }}",
+        custom_params="{{ params }}",
         do_xcom_push=True,
         dag=dag,
     )

@@ -16,7 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from airflow.models import BaseOperator
+from airflow.models import BaseOperator,Variable
 from airflow.providers.cncf.kubernetes.hooks.kubernetes import KubernetesHook,_load_body_to_dict
 from datetime import datetime,timedelta
 from jinja2 import Template
@@ -79,7 +79,7 @@ class CustomSparkKubernetesOperator(BaseOperator):
             # Adding timestamp in at the end of the args string
             params_as_dict["args"].append(self.timestamp)
         if custom_params != None:
-            with open('dags/templates/' + template) as file_:
+            with open(Variable.get('template_location') + template) as file_:
                 sparkApptemplate = Template(file_.read())
             return_value = str(sparkApptemplate.render(params_as_dict))
             self.log.info(return_value)
