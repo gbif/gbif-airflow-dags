@@ -41,6 +41,11 @@ spec:
      "spark.driver.extraClassPath": "/etc/hadoop/conf/:/etc/gbif/:/stackable/spark/extra-jars/*"
      "spark.executor.extraClassPath": "/etc/hadoop/conf/:/etc/gbif/:/stackable/spark/extra-jars/*"
      "spark.kubernetes.authenticate.driver.serviceAccountName": "gbif-spark-sa"
+     "spark.kubernetes.scheduler.name": "yunikorn"
+     "spark.kubernetes.driver.label.queue": "root.gbif-develop"
+     "spark.kubernetes.executor.label.queue": "root.gbif-develop"
+     "spark.kubernetes.driver.annotation.yunikorn.apache.org/app-id": "{{APP_ID}}"
+     "spark.kubernetes.executor.annotation.yunikorn.apache.org/app-id": "{{APP_ID}}"
 {%- endraw %}
 {% if componentConfig is defined or hdfsClusterName is defined or hiveClusterName is defined or hbaseClusterName is defined %}
   volumes:
@@ -95,9 +100,9 @@ spec:
         subPath: config.yaml
 {% endif %}
 {% if componentProperty is defined %}
-    - name: gbif-property
-      mountPath: {{ componentProperty.path }}{{ componentProperty.file }}
-      subPath: {{ componentProperty.file }}
+      - name: gbif-property
+        mountPath: {{ componentProperty.path }}{{ componentProperty.file }}
+        subPath: {{ componentProperty.file }}
 {% endif %}
 {% if hdfsClusterName is defined %}
       - name: hdfs-env
