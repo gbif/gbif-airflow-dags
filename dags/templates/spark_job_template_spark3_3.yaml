@@ -92,8 +92,7 @@ spec:
         annotations:
           yunikorn.apache.org/task-group-name: "spark-driver"
           yunikorn.apache.org/task-groups: |-
-            [
-              {
+            [{
                 name: "spark-driver",
                 minMember: 1,
                 minResource: {
@@ -108,8 +107,7 @@ spec:
                   cpu: 1,
                   memory: 2Gi
                 }
-              }
-            ]
+            }]
     resources:
       cpu:
         min: "100m"
