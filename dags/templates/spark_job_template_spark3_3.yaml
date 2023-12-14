@@ -100,14 +100,6 @@ spec:
                 cpu: 1,
                 memory: 2Gi
               }
-            },
-            {
-              name: "spark-executor",
-              minMember: 10,
-              minResource: {
-                cpu: 1,
-                memory: 2Gi
-              }
             }
           ]
     resources:
@@ -146,6 +138,21 @@ spec:
         subPath: hbase-site.xml
 {% endif %}
   executor:
+    podOverrides:
+      annotations:
+        yunikorn.apache.org/schedulingPolicyParameters: "placeholderTimeoutSeconds=30"
+        yunikorn.apache.org/task-group-name: "spark-executor"
+        yunikorn.apache.org/task-groups: |-
+          [            
+            {
+              name: "spark-executor",
+              minMember: 10,
+              minResource: {
+                cpu: 1,
+                memory: 2Gi
+              }
+            }
+          ]
     instances: {{ executorInstances }}
     resources:
       cpu:
