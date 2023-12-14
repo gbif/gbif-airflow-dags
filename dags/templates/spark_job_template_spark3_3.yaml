@@ -87,6 +87,29 @@ spec:
 {% endif %}
 {% endif %}
   driver:
+    podOverrides:
+      annotations:
+        yunikorn.apache.org/schedulingPolicyParameters: "placeholderTimeoutSeconds=30"
+        yunikorn.apache.org/task-group-name: "spark-driver"
+        yunikorn.apache.org/task-groups: |-
+          [
+            {
+              name: "spark-driver",
+              minMember: 1,
+              minResource: {
+                cpu: 1,
+                memory: 2Gi
+              }
+            },
+            {
+              name: "spark-executor",
+              minMember: 10,
+              minResource: {
+                cpu: 1,
+                memory: 2Gi
+              }
+            }
+          ]
     resources:
       cpu:
         min: "100m"
