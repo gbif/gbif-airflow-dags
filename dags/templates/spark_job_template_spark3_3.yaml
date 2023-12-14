@@ -91,7 +91,7 @@ spec:
       metadata:
         annotations:
           yunikorn.apache.org/task-group-name: "spark-driver"
-          yunikorn.apache.org/task-groups: |-
+          yunikorn.apache.org/task-groups: >- 
             [{
                 name: "spark-driver",
                 minMember: 1,
