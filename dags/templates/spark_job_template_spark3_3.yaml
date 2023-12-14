@@ -89,7 +89,6 @@ spec:
   driver:
     podOverrides:
       annotations:
-        yunikorn.apache.org/schedulingPolicyParameters: "placeholderTimeoutSeconds=30"
         yunikorn.apache.org/task-group-name: "spark-driver"
         yunikorn.apache.org/task-groups: |-
           [
@@ -140,7 +139,6 @@ spec:
   executor:
     podOverrides:
       annotations:
-        yunikorn.apache.org/schedulingPolicyParameters: "placeholderTimeoutSeconds=30"
         yunikorn.apache.org/task-group-name: "spark-executor"
         yunikorn.apache.org/task-groups: |-
           [            
