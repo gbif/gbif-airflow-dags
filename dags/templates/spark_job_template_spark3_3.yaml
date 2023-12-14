@@ -102,7 +102,7 @@ spec:
             },
             {
               name: "spark-executor",
-              minMember: 10,
+              minMember: 3,
               minResource: {
                 cpu: 1,
                 memory: 2Gi
