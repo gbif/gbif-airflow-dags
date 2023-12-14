@@ -146,9 +146,10 @@ spec:
         subPath: hbase-site.xml
 {% endif %}
   executor:
-    metadata:
-      annotations:
-        yunikorn.apache.org/task-group-name: "spark-executor"
+    podOverrides:
+      metadata:
+        annotations:
+          yunikorn.apache.org/task-group-name: "spark-executor"
     instances: {{ executorInstances }}
     resources:
       cpu:
