@@ -91,22 +91,22 @@ spec:
       metadata:
         annotations:
           yunikorn.apache.org/task-group-name: "spark-driver"
-          yunikorn.apache.org/task-groups: >- 
+          yunikorn.apache.org/task-groups: |-
             [{
-                name: "spark-driver",
-                minMember: 1,
-                minResource: {
-                  cpu: 1,
-                  memory: 2Gi
-                }
-              },
-              {
-                name: "spark-executor",
-                minMember: 3,
-                minResource: {
-                  cpu: 1,
-                  memory: 2Gi
-                }
+              "name": "spark-driver",
+              "minMember": 1,
+              "minResource": {
+                "cpu": "1",
+                "memory": "2Gi"
+              }
+             },
+             {
+              "name": "spark-executor",
+              "minMember": 3,
+              "minResource": {
+                "cpu": "1",
+                "memory": "2Gi"
+             }
             }]
     resources:
       cpu:
