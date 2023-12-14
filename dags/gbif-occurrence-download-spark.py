@@ -61,7 +61,7 @@ with DAG(
         computed_name="dwnld-{{ params.args[0] }}",
         do_xcom_push=True,
         dag=dag,
-        on_success_callback=on_success_download,
+        on_success_callback=on_execute_download,
         on_failure_callback=on_failure_download,
     )
 
