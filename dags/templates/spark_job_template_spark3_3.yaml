@@ -148,6 +148,23 @@ spec:
       metadata:
         annotations:
           yunikorn.apache.org/task-group-name: "spark-executor"
+          yunikorn.apache.org/task-groups: |-
+            [{
+              "name": "spark-driver",
+              "minMember": 1,
+              "minResource": {
+                "cpu": "1",
+                "memory": "2Gi"
+              }
+             },
+             {
+              "name": "spark-executor",
+              "minMember": 3,
+              "minResource": {
+                "cpu": "1",
+                "memory": "2Gi"
+             }
+            }]
     instances: {{ executorInstances }}
     resources:
       cpu:
