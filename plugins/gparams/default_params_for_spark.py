@@ -21,8 +21,8 @@ from datetime import datetime
 class DefaultParamsForSpark:
         
     MAP_BASE: object = {
-        "version": "0.37.0-SNAPSHOT",
-        "component": "spark-generate",
+        "version": "1.0.4",
+        "component": "spark-generate-maps",
         "hdfsClusterName": "gbif-hdfs",
         "hiveClusterName": "gbif-hive-metastore",
         "hbaseClusterName": "gbif-hbase",
@@ -102,7 +102,7 @@ class DefaultParamsForSpark:
     OCCURRENCE_TABLE_BUILD: object = {
         "sparkName": "occurrence-table-build",
         "args": ["/etc/gbif/config.yaml", "CREATE", "ALL"],
-        "version": "1.1.9",
+        "version": "1.1.19",
         "component": "occurrence-table-build-spark",
         "main": "org.gbif.occurrence.table.backfill.TableBackfill",
         "hdfsClusterName": "gbif-hdfs",
@@ -119,7 +119,7 @@ class DefaultParamsForSpark:
     OCCURRENCE_DOWNLOAD: object = {
         "sparkName": "occurrence-downloads",
         "args": ["", "Occurrence"],
-        "version": "0.194.0S",
+        "version": "0.194.0S43",
         "component": "occurrence-download-spark",
         "main": "org.gbif.occurrence.download.spark.SparkDownloads",
         "hdfsClusterName": "gbif-hdfs",
