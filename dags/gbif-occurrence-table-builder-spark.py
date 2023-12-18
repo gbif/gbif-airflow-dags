@@ -40,7 +40,7 @@ with DAG(
     spark_submit_main_stage = CustomSparkKubernetesOperator(
         task_id='spark_submit_main_stage',
         namespace = Variable.get('namespace_to_run'),
-        application_file="spark_job_template_spark3_3.yaml",
+        application_file="spark_job_template_sparks.yaml",
         custom_params="{{ params.main }}",
         timestamp="{{ ts_nodash }}",
         do_xcom_push=True,
