@@ -102,7 +102,7 @@ class DefaultParamsForSpark:
     OCCURRENCE_TABLE_BUILD: object = {
         "sparkName": "occurrence-table-build",
         "args": ["/etc/gbif/config.yaml", "CREATE", "ALL"],
-        "version": "1.1.19",
+        "version": "1.1.20",
         "component": "occurrence-table-build-spark",
         "main": "org.gbif.occurrence.table.backfill.TableBackfill",
         "hdfsClusterName": "gbif-hdfs",
