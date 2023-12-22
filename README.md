@@ -30,19 +30,25 @@ docker run --name my_awesome_container -d -v $HOME/workspace/repos/gbif-airflow-
 With command above running, the Airflow Portal should be available on the localhost:8080. The admin password for the local Airflow instance can be extracted from the pod with:
 
 ```
-docker exec my_awesome_container /bin/bash -c "cat /opt/airflow/standalone_admin_password.txt; echo \n"
+docker exec my_awesome_container /bin/bash -c "cat /opt/airflow/standalone_admin_password.txt; echo ''"
 ```
 
 If you haven't given the container a name, the auto generated name can be found with ```docker ps```. First time accessing the portal there were be a few warnings / errors but it is expected as two configurations are still missing.
 
 First create the variable that contains the namespace to use:
 
-![How to setup a variable in Airflow](docs/pictures/variable_setup.png "Airflow variable setup")
+![How to setup the namespace variable in Airflow](docs/pictures/variable_setup_namespace.png "Airflow variable setup namespace")
 
-Secondly create the kubernetes connection for Airflow to use:
+Secondly create the variable containing the path to the templates (assume it is dags/templates locally):
+
+![How to setup the template location variable in Airflow](docs/pictures/variable_setup_template_location.png "Airflow variable setup template")
+
+Thridly create the kubernetes connection for Airflow to use:
 
 ![How to setup a connection to a Kubernetes cluster in Airflow](docs/pictures/kubernetes_connection_setup.png "Airflow Kubernetes connection setup")
 
 ***NOTE! As Airflow uses your local kube config, it is your account that is used. Do not build the file into an image that is pushed or execute DAGs your aren't familier with.***
 
 As the standard image doesn't contain the Trino provider, two of the example DAGs will still show as failing.
+
+For testing with the Airflow API, it is necessary to configured the auth.backend property for Airflow to support basic auth before being able to authenticate with the API.

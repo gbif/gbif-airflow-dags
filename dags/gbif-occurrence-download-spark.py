@@ -21,7 +21,7 @@ from airflow.models import Variable
 from airflow.models.param import Param
 from airflow.utils.trigger_rule import TriggerRule
 from datetime import datetime,timedelta
-from params.default_params_for_spark import DefaultParamsForSpark
+from gparams.default_params_for_spark import DefaultParamsForSpark
 from operators.custom_spark_operator import CustomSparkKubernetesOperator
 from sensors.extended_stackable_spark_sensor import ExtendedSparkKubernetesSensor
 import requests
@@ -61,7 +61,7 @@ with DAG(
         computed_name="dwnld-{{ params.args[0] }}",
         do_xcom_push=True,
         dag=dag,
-        on_success_callback=on_success_download,
+        on_success_callback=on_execute_download,
         on_failure_callback=on_failure_download,
     )
 
