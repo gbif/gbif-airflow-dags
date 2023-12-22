@@ -33,7 +33,7 @@ with DAG(
     catchup=False,
     dagrun_timeout=timedelta(minutes=180),
     tags=['spark_executor', 'GBIF', 'grscicoll_cache'],
-    params = DefaultParamsForSpark.GRSCICOLL_CACHE,
+    params = DefaultParamsForSpark.GRSCICOLL_CACHE2,
 
 ) as dag:
 
