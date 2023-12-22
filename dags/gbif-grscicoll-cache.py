@@ -54,7 +54,7 @@ with DAG(
     create_trino_table = TrinoOperator(
       task_id='create_trino_table',
       trino_conn_id='gbif_trino_conn',
-      sql="""USE hive;DROP TABLE IF EXISTS marcos.occurrence_collections;
+      sql="""DROP TABLE IF EXISTS marcos.occurrence_collections;
            CREATE TABLE marcos.occurrence_collections WITH (format = 'PARQUET') AS
            SELECT DISTINCT ownerInstitutionCode, institutionId, institutionCode, collectionCode,
            collectionId, datasetKey,
