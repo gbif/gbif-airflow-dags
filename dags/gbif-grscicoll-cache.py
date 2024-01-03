@@ -33,21 +33,7 @@ with DAG(
     catchup=False,
     dagrun_timeout=timedelta(minutes=180),
     tags=['spark_executor', 'GBIF', 'grscicoll_cache'],
-    params = {
-         "sparkName": "grscicoll-cache",
-         "version": "1.33-H3-SNAPSHOT ",
-         "component": "kvs-indexing",
-         "main": "org.gbif.kvs.indexing.grscicoll.GrscicollPipelineWorkflow",
-         "hdfsClusterName": "gbif-hdfs",
-         "hiveClusterName": "gbif-hive-metastore",
-         "hbaseClusterName": "gbif-hbase",
-         "componentConfig": "grscicoll-cache",
-         "driverCores": "2000m",
-         "driverMemory": "2Gi",
-         "executorInstances": 6,
-         "executorCores": "6000m",
-         "executorMemory": "8Gi",
-     },
+    params = DefaultParamsForSpark.GRSCICOLL_CACHE,
 
 ) as dag:
 
