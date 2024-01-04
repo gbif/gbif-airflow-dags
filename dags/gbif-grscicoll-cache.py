@@ -52,6 +52,7 @@ with DAG(
         namespace = Variable.get('namespace_to_run'),
         application_file="spark_job_template.yaml",
         custom_params="{{ params }}",
+        timestamp="{{ ts_nodash }}",
         do_xcom_push=True,
         dag=dag,
     )
