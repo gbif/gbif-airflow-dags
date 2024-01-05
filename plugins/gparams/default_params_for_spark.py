@@ -158,7 +158,7 @@ class DefaultParamsForSpark:
     GRSCICOLL_CACHE: object = {
         "sparkName": "grscicoll-cache",
         "args": ["config.properties"],
-        "version": "1.33-H3-SNAPSHOT ",
+        "version": "1.33.1-H3-SNAPSHOT ",
         "component": "kvs-indexing",
         "main": "org.gbif.kvs.indexing.grscicoll.GrscicollPipelineWorkflow",
         "hdfsClusterName": "gbif-hdfs",
