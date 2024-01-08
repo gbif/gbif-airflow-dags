@@ -164,7 +164,11 @@ class DefaultParamsForSpark:
         "hdfsClusterName": "gbif-hdfs",
         "hiveClusterName": "gbif-hive-metastore",
         "hbaseClusterName": "gbif-hbase",
-        "componentConfig": "grscicoll-cache",
+        "componentProperty": {
+            "propertyName": "grscicoll-cache",
+            "path": "/etc/gbif",
+            "file": "config.properties",
+        },
         "driverCores": "2000m",
         "driverMemory": "2Gi",
         "executorInstances": 6,
