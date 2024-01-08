@@ -166,7 +166,7 @@ class DefaultParamsForSpark:
         "hbaseClusterName": "gbif-hbase",
         "componentProperty": {
             "propertyName": "grscicoll-cache",
-            "path": "/etc/gbif",
+            "path": "/etc/gbif/",
             "file": "config.properties",
         },
         "driverCores": "2000m",
