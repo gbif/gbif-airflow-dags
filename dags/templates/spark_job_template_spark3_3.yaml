@@ -96,7 +96,7 @@ spec:
               "name": "spark-driver",
               "minMember": 1,
               "minResource": {
-                "cpu": "100m",
+                "cpu": "{{ driverCores }}",
                 "memory": "{{ driverMemory }}"
               }
             }]
@@ -145,7 +145,7 @@ spec:
               "name": "spark-executor",
               "minMember": {{ executorInstances }},
               "minResource": {
-                "cpu": "100m",
+                "cpu": "{{ executorCores }}",
                 "memory": "{{ executorMemory }}"
               }
             }]
