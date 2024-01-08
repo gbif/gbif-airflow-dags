@@ -96,17 +96,9 @@ spec:
               "name": "spark-driver",
               "minMember": 1,
               "minResource": {
-                "cpu": "1",
-                "memory": "2Gi"
+                "cpu": "100m",
+                "memory": "{{ driverMemory }}"
               }
-             },
-             {
-              "name": "spark-executor",
-              "minMember": 3,
-              "minResource": {
-                "cpu": "1",
-                "memory": "2Gi"
-             }
             }]
     resources:
       cpu:
@@ -150,20 +142,12 @@ spec:
           yunikorn.apache.org/task-group-name: "spark-executor"
           yunikorn.apache.org/task-groups: |-
             [{
-              "name": "spark-driver",
-              "minMember": 1,
-              "minResource": {
-                "cpu": "1",
-                "memory": "2Gi"
-              }
-             },
-             {
               "name": "spark-executor",
-              "minMember": 3,
+              "minMember": {{ executorInstances }},
               "minResource": {
-                "cpu": "1",
-                "memory": "2Gi"
-             }
+                "cpu": "100m",
+                "memory": "{{ executorMemory }}"
+              }
             }]
     instances: {{ executorInstances }}
     resources:
